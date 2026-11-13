@@ -151,21 +151,21 @@ experimental_createQueryPersister(options: StoragePersisterOptions)
 #### `Options`
 
 ```tsx
-export interface StoragePersisterOptions {
+export interface StoragePersisterOptions<TStorageValue = string> {
   /** The storage client used for setting and retrieving items from cache.
    * For SSR pass in `undefined`.
    */
-  storage: AsyncStorage | Storage | undefined | null
+  storage: AsyncStorage<TStorageValue> | Storage | undefined | null
   /**
    * How to serialize the data to storage.
    * @default `JSON.stringify`
    */
-  serialize?: (persistedQuery: PersistedQuery) => string
+  serialize?: (persistedQuery: PersistedQuery) => MaybePromise<TStorageValue>
   /**
    * How to deserialize the data from storage.
    * @default `JSON.parse`
    */
-  deserialize?: (cachedString: string) => PersistedQuery
+  deserialize?: (cachedString: TStorageValue) => MaybePromise<PersistedQuery>
   /**
    * A unique string that can be used to forcefully invalidate existing caches,
    * if they do not share the same buster string
@@ -203,6 +203,8 @@ interface AsyncStorage<TStorageValue = string> {
   entries?: () => MaybePromise<Array<[key: string, value: TStorageValue]>>
 }
 ```
+
+The `serialize` and `deserialize` callbacks can return their results synchronously or asynchronously as promises. Set `TStorageValue` to store values other than strings, for example objects in IndexedDB.
 
 The default options are:
 
